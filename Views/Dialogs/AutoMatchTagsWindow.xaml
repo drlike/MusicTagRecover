@@ -1,0 +1,131 @@
+<Window x:Class="MusicTagRecover.Views.Dialogs.AutoMatchTagsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="批量自动匹配标签"
+        Width="540" Height="560"
+        MinWidth="460" MinHeight="480"
+        ResizeMode="CanResize"
+        WindowStartupLocation="CenterOwner"
+        ShowInTaskbar="False"
+        Background="{StaticResource PageBgBrush}"
+        FontFamily="{StaticResource AppFontFamily}">
+    <DockPanel Margin="16">
+        <!-- 底部按钮区 -->
+        <Grid DockPanel.Dock="Bottom" Margin="0,12,0,0">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Content="确定"
+                        Style="{StaticResource PrimaryButton}"
+                        Margin="0,0,8,0"
+                        IsDefault="True"
+                        Click="OkButton_Click"/>
+                <Button Content="取消"
+                        Style="{StaticResource BaseButton}"
+                        IsCancel="True"/>
+            </StackPanel>
+        </Grid>
+
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+        <!-- 字段设置标题 + 全选/取消全选（三态复选框，快捷键 Ctrl+A） -->
+        <DockPanel Grid.Row="0" Margin="0,0,0,8">
+            <!--CheckBox x:Name="SelectAllBox"
+                      DockPanel.Dock="Right"
+                      Content="全选"
+                      IsThreeState="True"
+                      IsChecked="{Binding AreAllEnabled}"
+                      ToolTip="全选/取消全选所有字段（快捷键 Ctrl+A）"/ -->
+            <TextBlock Text="字段设置" FontWeight="SemiBold" VerticalAlignment="Center"/>
+        </DockPanel>
+        <!-- 字段设置表：弹性高度，随窗口缩放完整展示所有行 -->
+        <DataGrid x:Name="FieldsGrid"
+                  Grid.Row="1"
+                  ItemsSource="{Binding Rows}"
+                  MinHeight="260"
+                  Margin="0,0,0,14">
+            <DataGrid.Columns>
+                <DataGridTemplateColumn Header="字段" Width="*">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding DisplayName}" VerticalAlignment="Center"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn  Width="68">
+                    <DataGridTemplateColumn.Header >
+                        <!-- 表头全选复选框：与右上角“全选”同步三态 -->
+                        <CheckBox HorizontalAlignment="Center"
+                                  IsThreeState="True"
+                                  IsChecked="{Binding DataContext.AreAllEnabled, RelativeSource={RelativeSource AncestorType=Window}}"
+                                  ToolTip="全选/取消全选（Ctrl+A）" Content="启用"/>
+                    </DataGridTemplateColumn.Header>
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <CheckBox HorizontalAlignment="Center"
+                                      IsChecked="{Binding Enabled, UpdateSourceTrigger=PropertyChanged}"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn Header="写入模式" Width="140">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <ComboBox Margin="4,0"
+                                      ItemsSource="{Binding DataContext.WriteModes, RelativeSource={RelativeSource AncestorType=Window}}"
+                                      DisplayMemberPath="Text"
+                                      SelectedValuePath="Value"
+                                      SelectedValue="{Binding WriteMode, UpdateSourceTrigger=PropertyChanged}"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn  Width="76">
+                    <DataGridTemplateColumn.Header>
+                        <!-- 表头全选复选框：一键勾选/取消所有字段的“覆盖已有”，三态与各行联动 -->
+                        <CheckBox HorizontalAlignment="Center"
+                                  IsThreeState="True"
+                                  IsChecked="{Binding DataContext.AreAllOverwrite, RelativeSource={RelativeSource AncestorType=Window}}"
+                                  ToolTip="全选/取消全选“覆盖已有”" Content="覆盖"/>
+                    </DataGridTemplateColumn.Header>
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <CheckBox HorizontalAlignment="Center"
+                                      IsChecked="{Binding Overwrite, UpdateSourceTrigger=PropertyChanged}"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <!-- 线程数 -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,0,0,12">
+            <TextBlock Text="并发线程数：" VerticalAlignment="Center"/>
+            <Button Width="30" MinWidth="30" Height="30" MinHeight="30" Padding="0" Margin="0"
+                    Style="{StaticResource ToolButton}"
+                    Content="-"
+                    Command="{Binding DecreaseThreadCommand}"/>
+            <TextBox Width="52" MinHeight="30"
+                     Margin="6,0"
+                     TextAlignment="Center"
+                     Text="{Binding ThreadCountText, UpdateSourceTrigger=PropertyChanged}"/>
+            <Button Width="30" MinWidth="30" Height="30" MinHeight="30" Padding="0" Margin="0"
+                    Style="{StaticResource ToolButton}"
+                    Content="+"
+                    Command="{Binding IncreaseThreadCommand}"/>
+            <TextBlock Text="（范围 1 - 16）"
+                       Margin="12,0,0,0"
+                       Foreground="{StaticResource TextSecondaryBrush}"
+                       FontSize="{StaticResource FontSizeSmall}"
+                       VerticalAlignment="Center"/>
+        </StackPanel>
+
+        <!-- 歌词过滤选项（允许长文本换行完整显示） -->
+        <CheckBox Grid.Row="3" IsChecked="{Binding DontDownloadInstrumental}">
+            <TextBlock Text="不下载标题含“伴奏 / 纯音乐 / Instrumental”的歌词"
+                       TextWrapping="Wrap"/>
+        </CheckBox>
+        </Grid>
+    </DockPanel>
+</Window>

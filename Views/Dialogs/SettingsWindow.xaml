@@ -1,0 +1,494 @@
+<Window x:Class="MusicTagRecover.Views.Dialogs.SettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="设置"
+        Width="780" Height="620"
+        MinWidth="700" MinHeight="560"
+        WindowStartupLocation="CenterOwner"
+        ShowInTaskbar="False"
+        Background="{StaticResource PageBgBrush}">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TabControl Grid.Row="0" Margin="10,10,10,4">
+
+            <!-- ============ 常规 ============ -->
+            <TabItem Header="常规">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="16">
+                    <StackPanel MaxWidth="680" HorizontalAlignment="Left">
+                        <CheckBox Content="扫描时包含子文件夹" IsChecked="{Binding IncludeSubDir}" Margin="0,4"/>
+                        <Grid Margin="0,10,0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="240"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Label Grid.Column="0" Content="限制扫描的文件扩展名（; 分隔）"/>
+                            <TextBox Grid.Column="1" Text="{Binding RestrictFileExts}"/>
+                        </Grid>
+                        <CheckBox Content="按时长过滤文件" IsChecked="{Binding FileFilterByDuration}" Margin="0,4"/>
+                        <CheckBox Content="过滤时忽略视频文件" IsChecked="{Binding FileFilterIgnoreVideoFile}" Margin="0,4"/>
+                        <Grid Margin="0,10,0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="240"/>
+                                <ColumnDefinition Width="160"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Label Grid.Column="0" Content="MP3 标签版本（ID3v2）"/>
+                            <ComboBox Grid.Column="1" SelectedValue="{Binding Id3v2Version}"
+                                      SelectedValuePath="Tag">
+                                <ComboBoxItem Content="ID3v2.3" Tag="v2.3"/>
+                                <ComboBoxItem Content="ID3v2.4" Tag="v2.4"/>
+                            </ComboBox>
+                        </Grid>
+                        <CheckBox Content="保存标签时保留文件修改时间" IsChecked="{Binding SaveTagsKeepUpdateTime}" Margin="0,4"/>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- ============ 搜索 ============ -->
+            <TabItem Header="搜索">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="16">
+                    <StackPanel MaxWidth="680" HorizontalAlignment="Left">
+                        <Label Content="搜索关键词使用的标签字段" Style="{StaticResource SectionLabelStyle}"/>
+                        <CheckBox Content="使用标题" IsChecked="{Binding SearchConditionUseTitle}" Margin="0,4"/>
+                        <CheckBox Content="使用专辑" IsChecked="{Binding SearchConditionUseAlbum}" Margin="0,4"/>
+                        <CheckBox Content="使用艺术家" IsChecked="{Binding SearchConditionUseArtist}" Margin="0,4"/>
+                        <CheckBox Content="仅使用文件名搜索（旧版兼容）"
+                                  IsChecked="{Binding SearchConditionUseOnlyFilename}" Margin="0,4"/>
+                        <Grid Margin="0,10,0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="220"/>
+                                <ColumnDefinition Width="120"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Label Grid.Column="0" Content="每次网络搜索结果数量上限"/>
+                            <TextBox Grid.Column="1" Text="{Binding WebSearchItemsLimit}"/>
+                        </Grid>
+                        <Grid Margin="0,6,0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="220"/>
+                                <ColumnDefinition Width="120"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Label Grid.Column="0" Content="自动匹配网络搜索并发线程数"/>
+                            <TextBox Grid.Column="1" Text="{Binding AutoMatchTagsWebSearchThreadCount}"/>
+                        </Grid>
+                        <Grid Margin="0,6,0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="220"/>
+                                <ColumnDefinition Width="120"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Label Grid.Column="0" Content="iTunes 搜索地区参数（Country）"/>
+                            <TextBox Grid.Column="1" Text="{Binding ItunesSearchParamsCountry}"/>
+                        </Grid>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- ============ 歌词 ============ -->
+            <TabItem Header="歌词">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="16">
+                    <StackPanel MaxWidth="680" HorizontalAlignment="Left">
+                        <GroupBox Header="下载后处理">
+                            <GroupBox.HeaderTemplate>
+                                <DataTemplate>
+                                    <!-- 使用 TextBlock 并设置 Margin 确保不被裁剪 -->
+                                    <TextBlock Text="{Binding}" 
+                                     Margin="5,0"
+                                     FontWeight="Bold"/>
+                                </DataTemplate>
+                            </GroupBox.HeaderTemplate>
+                            <StackPanel Margin="4">
+                                <CheckBox Content="删除头部标签（ti/ar/al/by/offset）"
+                                          IsChecked="{Binding LyricDeleteHeadTag}" Margin="0,4"/>
+                                <CheckBox Content="删除空白行" IsChecked="{Binding LyricDeleteBlankLines}" Margin="0,4"/>
+                                <CheckBox Content="重新格式化时间轴" IsChecked="{Binding LyricReformatTimetag}" Margin="0,4"/>
+                                <CheckBox Content="删除时间轴（纯文本歌词）" IsChecked="{Binding LyricRemoveTimetag}" Margin="0,4"/>
+                                <CheckBox Content="标题含 Instrumental 时不下载歌词"
+                                          IsChecked="{Binding DontDownloadLyricWithInstrumentInTitle}" Margin="0,4"/>
+                            </StackPanel>
+                        </GroupBox>
+                        <GroupBox Header="翻译歌词" Margin="0,8,0,0">
+                            <GroupBox.HeaderTemplate>
+                                <DataTemplate>
+                                    <!-- 使用 TextBlock 并设置 Margin 确保不被裁剪 -->
+                                    <TextBlock Text="{Binding}" 
+                                     Margin="5,0"
+                                     FontWeight="Bold"/>
+                                </DataTemplate>
+                            </GroupBox.HeaderTemplate>
+                            <StackPanel Margin="4">
+                                <CheckBox Content="同时下载翻译歌词" IsChecked="{Binding DownloadTransEnable}" Margin="0,4"/>
+                                <CheckBox Content="有翻译时不下载原文歌词"
+                                          IsChecked="{Binding DownloadTransDontDownloadOrig}" Margin="0,4"/>
+                                <Grid Margin="0,6,0,4">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="180"/>
+                                        <ColumnDefinition Width="220"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Grid.Column="0" Content="歌词文件名格式"/>
+                                    <TextBox Grid.Column="1" Text="{Binding DownloadTransLyricFormat}"/>
+                                </Grid>
+                                <Grid Margin="0,6,0,4">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="180"/>
+                                        <ColumnDefinition Width="220"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Grid.Column="0" Content="中文简繁转换"/>
+                                    <ComboBox Grid.Column="1"
+                                              SelectedValue="{Binding DownloadTransChineseConvMode}"
+                                              SelectedValuePath="Tag">
+                                        <ComboBoxItem Content="不转换" Tag="none"/>
+                                        <ComboBoxItem Content="转为繁体" Tag="toTraditional"/>
+                                        <ComboBoxItem Content="转为简体" Tag="toSimplified"/>
+                                    </ComboBox>
+                                </Grid>
+                            </StackPanel>
+                        </GroupBox>
+                        <GroupBox Header="LRC 文件保存" Margin="0,8,0,0">
+                            <GroupBox.HeaderTemplate>
+                                <DataTemplate>
+                                    <!-- 使用 TextBlock 并设置 Margin 确保不被裁剪 -->
+                                    <TextBlock Text="{Binding}" 
+                                     Margin="5,0"
+                                     FontWeight="Bold"/>
+                                </DataTemplate>
+                            </GroupBox.HeaderTemplate>                            
+                            <StackPanel Margin="4">
+                                <Grid Margin="0,4">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="180"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Grid.Column="0" Content="LRC 默认保存目录"/>
+                                    <TextBox Grid.Column="1" Text="{Binding SaveLrcDirectory}" Margin="0,0,6,0"/>
+                                    <Button Grid.Column="2" Content="浏览…" Style="{StaticResource BaseButton}"
+                                            Command="{Binding BrowseSaveLrcDirCommand}"/>
+                                </Grid>
+                                <Grid Margin="0,6,0,4">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="180"/>
+                                        <ColumnDefinition Width="160"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Grid.Column="0" Content="LRC 默认编码"/>
+                                    <ComboBox Grid.Column="1" SelectedValue="{Binding SaveLrcEncoding}"
+                                              SelectedValuePath="Tag">
+                                        <ComboBoxItem Content="UTF-8" Tag="utf-8"/>
+                                        <ComboBoxItem Content="GBK" Tag="gbk"/>
+                                        <ComboBoxItem Content="Big5" Tag="big5"/>
+                                        <ComboBoxItem Content="Unicode (UTF-16)" Tag="unicode"/>
+                                    </ComboBox>
+                                </Grid>
+                                <Grid Margin="0,6,0,4">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="180"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Label Grid.Column="0" Content="LRC 文件名格式"/>
+                                    <TextBox Grid.Column="1" Text="{Binding SaveLrcFilenameFormat}"/>
+                                </Grid>
+                            </StackPanel>
+                        </GroupBox>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- ============ 图片 ============ -->
+            <TabItem Header="图片">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="16">
+                    <StackPanel MaxWidth="680" HorizontalAlignment="Left">
+                        <Grid Margin="0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="220"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Label Grid.Column="0" Content="允许的图片格式（, 分隔）"/>
+                            <TextBox Grid.Column="1" Text="{Binding PictureFormatLimits}"/>
+                        </Grid>
+                        <Grid Margin="0,8,0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="220"/>
+                                <ColumnDefinition Width="120"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Label Grid.Column="0" Content="最大分辨率（宽或高，像素）"/>
+                            <TextBox Grid.Column="1" Text="{Binding PictureResolutionLimits, TargetNullValue=''}"/>
+                        </Grid>
+                        <Grid Margin="0,8,0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="220"/>
+                                <ColumnDefinition Width="120"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Label Grid.Column="0" Content="最大文件大小（KB）"/>
+                            <TextBox Grid.Column="1" Text="{Binding PictureSizeLimitsKB, TargetNullValue=''}"/>
+                        </Grid>
+                        <CheckBox Content="下载封面时覆盖当前图片框中的封面"
+                                  IsChecked="{Binding OverwritePictureboxPicture}" Margin="6,8,0,4"/>
+                        <Grid Margin="0,8,0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="220"/>
+                                <ColumnDefinition Width="120"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Label Grid.Column="0" Content="URL 图片缓存上限（MB）"/>
+                            <TextBox Grid.Column="1" Text="{Binding UrlCacheMaxSizeMb}"/>
+                        </Grid>
+                        <Grid Margin="0,8,0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="220"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Label Grid.Column="0" Content="当前缓存目录"/>
+                            <TextBox Grid.Column="1" Text="{Binding UrlCacheDir}" IsReadOnly="True"/>
+                        </Grid>
+                        <StackPanel Orientation="Horizontal" Margin="6,10,0,4">
+                            <Button Content="立即清理缓存" Style="{StaticResource BaseButton}"
+                                    Command="{Binding ClearCacheCommand}"
+                                    ToolTip="清空 URL 下载缓存（cache\\img），并清理无历史引用的孤儿封面文件"/>
+                            <TextBlock Text="{Binding CacheSizeText}" Margin="10,0,0,0"
+                                       Foreground="{StaticResource TextSecondaryBrush}"
+                                       VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- ============ 标签源 ============ -->
+            <TabItem Header="标签源">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="12">
+                    <StackPanel MaxWidth="700" HorizontalAlignment="Left">
+
+                        <GroupBox Header="封面数据源（启用 / 排序 / 每源数量）">
+                            <GroupBox.HeaderTemplate>
+                                <DataTemplate>
+                                    <!-- 使用 TextBlock 并设置 Margin 确保不被裁剪 -->
+                                    <TextBlock Text="{Binding}" 
+                                     Margin="5,0"
+                                     FontWeight="Bold"/>
+                                </DataTemplate>
+                            </GroupBox.HeaderTemplate>
+                            <ListBox ItemsSource="{Binding PictureSources.Items}" Height="190" Margin="4">
+                                <ListBox.ItemContainerStyle>
+                                    <Style TargetType="ListBoxItem">
+                                        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                    </Style>
+                                </ListBox.ItemContainerStyle>
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid Margin="2">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="60"/>
+                                                <ColumnDefinition Width="150"/>
+                                                <ColumnDefinition Width="110"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <CheckBox Grid.Column="0" Content="启用" VerticalAlignment="Center"
+                                                      IsChecked="{Binding Enabled, Mode=TwoWay}"/>
+                                            <TextBlock Grid.Column="1" Text="{Binding Label}" VerticalAlignment="Center"/>
+                                            <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                                                <TextBlock Text="数量" VerticalAlignment="Center"/>
+                                                <TextBox Width="60" Margin="6,0,0,0"
+                                                         Text="{Binding WebSearchItemsLimit, Mode=TwoWay, TargetNullValue=''}"/>
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="3" Orientation="Horizontal">
+                                                <Button Content="↑" Width="32" Padding="0" Margin="0" MinWidth="32" Style="{StaticResource BaseButton}"
+                                                        Command="{Binding DataContext.MovePictureUpCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                        CommandParameter="{Binding}"/>
+                                                <Button Content="↓" Width="32" Padding="0" Margin="4,0,0,0" MinWidth="32" Style="{StaticResource BaseButton}"
+                                                        Command="{Binding DataContext.MovePictureDownCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                        CommandParameter="{Binding}"/>
+                                            </StackPanel>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </GroupBox>
+
+                        <GroupBox Header="歌词数据源（启用 / 排序 / 每源数量）" Margin="0,8,0,0">
+                            <GroupBox.HeaderTemplate>
+                                <DataTemplate>
+                                    <!-- 使用 TextBlock 并设置 Margin 确保不被裁剪 -->
+                                    <TextBlock Text="{Binding}" 
+                                     Margin="5,0"
+                                     FontWeight="Bold"/>
+                                </DataTemplate>
+                            </GroupBox.HeaderTemplate>                            
+                            <ListBox ItemsSource="{Binding LyricSources.Items}" Height="126" Margin="4">
+                                <ListBox.ItemContainerStyle>
+                                    <Style TargetType="ListBoxItem">
+                                        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                    </Style>
+                                </ListBox.ItemContainerStyle>
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid Margin="2">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="60"/>
+                                                <ColumnDefinition Width="150"/>
+                                                <ColumnDefinition Width="110"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <CheckBox Grid.Column="0" Content="启用" VerticalAlignment="Center"
+                                                      IsChecked="{Binding Enabled, Mode=TwoWay}"/>
+                                            <TextBlock Grid.Column="1" Text="{Binding Label}" VerticalAlignment="Center"/>
+                                            <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                                                <TextBlock Text="数量" VerticalAlignment="Center"/>
+                                                <TextBox Width="60" Margin="6,0,0,0"
+                                                         Text="{Binding WebSearchItemsLimit, Mode=TwoWay, TargetNullValue=''}"/>
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="3" Orientation="Horizontal">
+                                                <Button Content="↑" Width="32" Padding="0" Margin="0" MinWidth="32" Style="{StaticResource BaseButton}"
+                                                        Command="{Binding DataContext.MoveLyricUpCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                        CommandParameter="{Binding}"/>
+                                                <Button Content="↓" Width="32" Padding="0" Margin="4,0,0,0" MinWidth="32" Style="{StaticResource BaseButton}"
+                                                        Command="{Binding DataContext.MoveLyricDownCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                        CommandParameter="{Binding}"/>
+                                            </StackPanel>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </GroupBox>
+
+                        <GroupBox Header="组合标签数据源（启用 / 排序 / 每源数量）" Margin="0,8,0,0">
+                            <GroupBox.HeaderTemplate>
+                                <DataTemplate>
+                                    <!-- 使用 TextBlock 并设置 Margin 确保不被裁剪 -->
+                                    <TextBlock Text="{Binding}" 
+                                     Margin="5,0"
+                                     FontWeight="Bold"/>
+                                </DataTemplate>
+                            </GroupBox.HeaderTemplate>                            
+                            <ListBox ItemsSource="{Binding CombTagSources.Items}" Height="190" Margin="4">
+                                <ListBox.ItemContainerStyle>
+                                    <Style TargetType="ListBoxItem">
+                                        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                    </Style>
+                                </ListBox.ItemContainerStyle>
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid Margin="2">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="60"/>
+                                                <ColumnDefinition Width="150"/>
+                                                <ColumnDefinition Width="110"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <CheckBox Grid.Column="0" Content="启用" VerticalAlignment="Center"
+                                                      IsChecked="{Binding Enabled, Mode=TwoWay}"/>
+                                            <TextBlock Grid.Column="1" Text="{Binding Label}" VerticalAlignment="Center"/>
+                                            <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                                                <TextBlock Text="数量" VerticalAlignment="Center"/>
+                                                <TextBox Width="60" Margin="6,0,0,0"
+                                                         Text="{Binding WebSearchItemsLimit, Mode=TwoWay, TargetNullValue=''}"/>
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="3" Orientation="Horizontal">
+                                                <Button Content="↑" Width="32" Padding="0" Margin="0" MinWidth="32" Style="{StaticResource BaseButton}"
+                                                        Command="{Binding DataContext.MoveCombTagUpCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                        CommandParameter="{Binding}"/>
+                                                <Button Content="↓" Width="32" Padding="0" Margin="4,0,0,0" MinWidth="32" Style="{StaticResource BaseButton}"
+                                                        Command="{Binding DataContext.MoveCombTagDownCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                        CommandParameter="{Binding}"/>
+                                            </StackPanel>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </GroupBox>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- ============ 高级 ============ -->
+            <TabItem Header="高级">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="16">
+                    <StackPanel MaxWidth="680" HorizontalAlignment="Left">
+                        <Grid Margin="0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="220"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Label Grid.Column="0" Content="注释标签写入的网易云 Key"/>
+                            <TextBox Grid.Column="1" Text="{Binding CommentTagWrite163Key}"/>
+                        </Grid>
+                        <Grid Margin="0,8,0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="220"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Label Grid.Column="0" Content="多艺术家连接符"/>
+                            <TextBox Grid.Column="1" Text="{Binding ConnectorsArtists}"/>
+                        </Grid>
+                        <Grid Margin="0,8,0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="220"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Label Grid.Column="0" Content="原文/翻译歌词连接符"/>
+                            <TextBox Grid.Column="1" Text="{Binding ConnectorsLyricAndTLyric}"/>
+                        </Grid>
+                        <Grid Margin="0,8,0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="220"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Label Grid.Column="0" Content="组合标签搜索覆盖选项"/>
+                            <TextBox Grid.Column="1" Text="{Binding CombTagsSearchOverwriteOptions}"/>
+                        </Grid>
+                        <CheckBox Content="启用日志" IsChecked="{Binding LogEnabled}" Margin="6,10,0,4"/>
+                        <Grid Margin="0,8,0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="220"/>
+                                <ColumnDefinition Width="160"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Label Grid.Column="0" Content="日志级别"/>
+                            <ComboBox Grid.Column="1" SelectedValue="{Binding LogLevel}"
+                                      SelectedValuePath="Tag">
+                                <ComboBoxItem Content="调试 Debug" Tag="debug"/>
+                                <ComboBoxItem Content="信息 Info" Tag="info"/>
+                                <ComboBoxItem Content="警告 Warn" Tag="warn"/>
+                                <ComboBoxItem Content="错误 Error" Tag="error"/>
+                            </ComboBox>
+                        </Grid>
+                        <Grid Margin="0,8,0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="220"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Label Grid.Column="0" Content="代理地址（Proxy URL）"/>
+                            <TextBox Grid.Column="1" Text="{Binding ProxyUrl}"/>
+                        </Grid>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+        </TabControl>
+
+        <!-- 底部按钮 -->
+        <Border Grid.Row="1" Background="{StaticResource BottomBgBrush}"
+                BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,1,0,0"
+                Padding="12,8">
+            <Grid>
+                <Button Content="恢复默认" Style="{StaticResource DangerButton}"
+                        HorizontalAlignment="Left"
+                        Command="{Binding ResetDefaultsCommand}"/>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Content="确定" Style="{StaticResource PrimaryButton}"
+                            Command="{Binding SaveCommand}" IsDefault="True"/>
+                    <Button Content="取消" Margin="8,0,0,0" Style="{StaticResource BaseButton}"
+                            Command="{Binding CancelCommand}" IsCancel="True"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

@@ -1,0 +1,161 @@
+<Window x:Class="MusicTagRecover.Views.Dialogs.DffNativeTagsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="DFF 原生标签管理（DIIN / COMT）"
+        Width="780" Height="620"
+        MinWidth="640" MinHeight="480"
+        ResizeMode="CanResize"
+        WindowStartupLocation="CenterOwner"
+        ShowInTaskbar="False"
+        Background="{StaticResource PageBgBrush}"
+        FontFamily="{StaticResource AppFontFamily}">
+    <Window.Resources>
+        <!-- 单元格内长文本自动换行，避免内容被截断 -->
+        <Style x:Key="WrapCellText" TargetType="TextBlock">
+            <Setter Property="TextWrapping" Value="Wrap"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="4,2"/>
+        </Style>
+    </Window.Resources>
+    <DockPanel Margin="16">
+        <!-- 顶部：目标文件选择（含批量项） -->
+        <Border DockPanel.Dock="Top" Background="{StaticResource CardBgBrush}"
+                BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="4"
+                Padding="10,8" Margin="0,0,0,10">
+            <StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="目标文件：" VerticalAlignment="Center" FontWeight="SemiBold"/>
+                    <ComboBox x:Name="FileBox" MinWidth="320" MinHeight="30"
+                              VerticalAlignment="Center"
+                              DisplayMemberPath="Display"
+                              ItemsSource="{Binding FileItems}"
+                              SelectedItem="{Binding SelectedFileItem}"/>
+                </StackPanel>
+                <TextBlock Text="选择单个文件可查看并逐条编辑；选择「批量」项时，修改/删除将应用到全部选中的 DFF 文件。"
+                           TextWrapping="Wrap" FontSize="12" Margin="0,6,0,0"
+                           Foreground="{StaticResource TextSecondaryBrush}"/>
+            </StackPanel>
+        </Border>
+
+        <!-- 底部：状态 + 关闭 -->
+        <Border DockPanel.Dock="Bottom" Background="{StaticResource BottomBgBrush}"
+                BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="4"
+                Padding="10,7" Margin="0,10,0,0">
+            <Grid>
+                <TextBlock Text="{Binding StatusText}" TextWrapping="Wrap" VerticalAlignment="Center"
+                           Foreground="{StaticResource TextSecondaryBrush}"/>
+                <Button Content="关闭" Style="{StaticResource BaseButton}"
+                        HorizontalAlignment="Right" IsCancel="True" MinWidth="76"/>
+            </Grid>
+        </Border>
+
+        <!-- 主体：DIIN / COMT 两个独立页签，各有修改/删除/新增入口 -->
+        <TabControl Background="Transparent">
+            <!-- ============ DIIN 原生字段 ============ -->
+            <TabItem Header="DIIN 原生字段">
+                <DockPanel Margin="4,8">
+                    <Grid DockPanel.Dock="Top" Margin="0,0,0,8">
+                        <TextBlock VerticalAlignment="Center" TextWrapping="Wrap"
+                                   Foreground="{StaticResource TextSecondaryBrush}"
+                                   Text="DIIN 为 DSDIFF 原生标签块（DITI 标题、DIAR 艺术家等）。选择一行后可修改或删除；也可以新增自定义字段。"/>
+                        <Button Content="新增字段" Style="{StaticResource PrimaryButton}"
+                                HorizontalAlignment="Right" MinWidth="96"
+                                Command="{Binding AddDiinCommand}"/>
+                    </Grid>
+                    <Border Background="{StaticResource CardBgBrush}"
+                            BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="4">
+                        <DataGrid x:Name="DiinGrid" ItemsSource="{Binding DiinFields}"
+                                  AutoGenerateColumns="False" CanUserAddRows="False"
+                                  CanUserDeleteRows="False" CanUserResizeRows="False"
+                                  IsReadOnly="True" SelectionMode="Single"
+                                  MinRowHeight="28" ColumnHeaderHeight="34"
+                                  HeadersVisibility="Column" GridLinesVisibility="Horizontal"
+                                  BorderThickness="0" Background="Transparent"
+                                  MouseDoubleClick="OnDiinDoubleClick">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="字段" Binding="{Binding DisplayName}"
+                                                    Width="180" IsReadOnly="True"/>
+                                <DataGridTextColumn Header="内容" Binding="{Binding Text}"
+                                                    Width="*" IsReadOnly="True"
+                                                    ElementStyle="{StaticResource WrapCellText}"/>
+                                <DataGridTemplateColumn Header="操作" Width="180" IsReadOnly="True">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Orientation="Horizontal" Margin="4,0">
+                                                <Button Content="修改" Style="{StaticResource BaseButton}"
+                                                        MinWidth="76" Margin="0,0,8,0"
+                                                        Command="{Binding DataContext.EditDiinCommand,
+                                                            RelativeSource={RelativeSource AncestorType=Window}}"
+                                                        CommandParameter="{Binding}"/>
+                                                <Button Content="删除" Style="{StaticResource DangerButton}"
+                                                        MinWidth="76"
+                                                        Command="{Binding DataContext.DeleteDiinCommand,
+                                                            RelativeSource={RelativeSource AncestorType=Window}}"
+                                                        CommandParameter="{Binding}"/>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Border>
+                </DockPanel>
+            </TabItem>
+
+            <!-- ============ COMT 原生注释 ============ -->
+            <TabItem Header="COMT 原生注释">
+                <DockPanel Margin="4,8">
+                    <Grid DockPanel.Dock="Top" Margin="0,0,0,8">
+                        <TextBlock VerticalAlignment="Center" TextWrapping="Wrap"
+                                   Foreground="{StaticResource TextSecondaryBrush}"
+                                   Text="COMT 为 DSDIFF 原生注释块，可含多条带时间戳的注释（常见于 SACD 抓轨残留）。"/>
+                        <Button Content="追加注释" Style="{StaticResource PrimaryButton}"
+                                HorizontalAlignment="Right" MinWidth="96"
+                                Command="{Binding AddCommtCommand}"/>
+                    </Grid>
+                    <Border Background="{StaticResource CardBgBrush}"
+                            BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="4">
+                        <DataGrid x:Name="CommtGrid" ItemsSource="{Binding CommtComments}"
+                                  AutoGenerateColumns="False" CanUserAddRows="False"
+                                  CanUserDeleteRows="False" CanUserResizeRows="False"
+                                  IsReadOnly="True" SelectionMode="Single"
+                                  MinRowHeight="28" ColumnHeaderHeight="34"
+                                  HeadersVisibility="Column" GridLinesVisibility="Horizontal"
+                                  BorderThickness="0" Background="Transparent"
+                                  MouseDoubleClick="OnCommtDoubleClick">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="#" Binding="{Binding Index}"
+                                                    Width="44" IsReadOnly="True"/>
+                                <DataGridTextColumn Header="时间戳" Binding="{Binding DateTimeText}"
+                                                    Width="150" IsReadOnly="True"/>
+                                <DataGridTextColumn Header="类型/引用" Binding="{Binding TypeText}"
+                                                    Width="130" IsReadOnly="True"/>
+                                <DataGridTextColumn Header="内容" Binding="{Binding Text}"
+                                                    Width="*" IsReadOnly="True"
+                                                    ElementStyle="{StaticResource WrapCellText}"/>
+                                <DataGridTemplateColumn Header="操作" Width="180" IsReadOnly="True">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Orientation="Horizontal" Margin="4,0">
+                                                <Button Content="修改" Style="{StaticResource BaseButton}"
+                                                        MinWidth="76" Margin="0,0,8,0"
+                                                        Command="{Binding DataContext.EditCommtCommand,
+                                                            RelativeSource={RelativeSource AncestorType=Window}}"
+                                                        CommandParameter="{Binding}"/>
+                                                <Button Content="删除" Style="{StaticResource DangerButton}"
+                                                        MinWidth="76"
+                                                        Command="{Binding DataContext.DeleteCommtCommand,
+                                                            RelativeSource={RelativeSource AncestorType=Window}}"
+                                                        CommandParameter="{Binding}"/>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Border>
+                </DockPanel>
+            </TabItem>
+        </TabControl>
+    </DockPanel>
+</Window>

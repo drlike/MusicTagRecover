@@ -1,0 +1,76 @@
+<Window x:Class="MusicTagRecover.Views.Compare.DeleteHistoryWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="clr-namespace:MusicTagRecover.ViewModels.Compare"
+        Title="删除历史"
+        Width="800" Height="550" MinWidth="660" MinHeight="440"
+        ResizeMode="CanResize"
+        WindowStartupLocation="CenterOwner"
+        Background="{StaticResource PageBgBrush}"
+        Loaded="Window_Loaded">
+
+    <Window.Resources>
+        <vm:OpTypeDisplayConverter x:Key="OpTypeDisplayConverter"/>
+    </Window.Resources>
+
+    <DockPanel Margin="12">
+
+        <!-- ============ 底部操作按钮 ============ -->
+        <Border DockPanel.Dock="Bottom" Background="{StaticResource CardBgBrush}"
+                BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
+                CornerRadius="3" Padding="10,8" Margin="0,8,0,0">
+            <StackPanel Orientation="Horizontal">
+                <Button Content="还原选中" Style="{StaticResource PrimaryButton}"
+                        Click="Restore_Click"/>
+                <Button Content="刷新" Style="{StaticResource BaseButton}"
+                        Margin="8,0,0,0" Command="{Binding QueryLogsCommand}"/>
+                <Button Content="导出 CSV" Style="{StaticResource BaseButton}"
+                        Margin="8,0,0,0" Command="{Binding ExportCsvCommand}"/>
+                <Button Content="关闭" Style="{StaticResource BaseButton}"
+                        Margin="8,0,0,0" Click="Close_Click"/>
+            </StackPanel>
+        </Border>
+
+        <!-- ============ 顶部筛选区 ============ -->
+        <Border DockPanel.Dock="Top" Background="{StaticResource CardBgBrush}"
+                BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
+                CornerRadius="3" Padding="12">
+            <WrapPanel ItemHeight="38">
+                <TextBlock Text="时间范围：" VerticalAlignment="Center"/>
+                <DatePicker SelectedDate="{Binding FromDate}" Width="130"
+                            VerticalAlignment="Center" Margin="0,0,6,0"/>
+                <TextBlock Text="至" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                <DatePicker SelectedDate="{Binding ToDate}" Width="130"
+                            VerticalAlignment="Center" Margin="0,0,16,0"/>
+
+                <TextBlock Text="文件名：" VerticalAlignment="Center"/>
+                <TextBox Text="{Binding FileNameKeyword, UpdateSourceTrigger=PropertyChanged}"
+                         Width="130" VerticalAlignment="Center" Margin="0,0,12,0"/>
+
+                <TextBlock Text="路径：" VerticalAlignment="Center"/>
+                <TextBox Text="{Binding PathKeyword, UpdateSourceTrigger=PropertyChanged}"
+                         Width="180" VerticalAlignment="Center" Margin="0,0,12,0"/>
+
+                <Button Content="查询" Style="{StaticResource PrimaryButton}"
+                        VerticalAlignment="Center" Command="{Binding QueryLogsCommand}"/>
+                <Button Content="重置" Style="{StaticResource BaseButton}"
+                        VerticalAlignment="Center" Margin="8,0,0,0"
+                        Command="{Binding ResetFilterCommand}"/>
+            </WrapPanel>
+        </Border>
+
+        <!-- ============ 历史记录列表 ============ -->
+        <!-- DataGrid 样式、虚拟化、多选等默认值均由 Theme.xaml 提供，这里不重设 -->
+        <DataGrid x:Name="LogsGrid" ItemsSource="{Binding Logs}" IsReadOnly="True" Margin="0,10,0,0">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="删除时间" Width="150"
+                                    Binding="{Binding OpTime, StringFormat='yyyy-MM-dd HH:mm:ss'}"/>
+                <DataGridTextColumn Header="操作人" Width="130" Binding="{Binding Operator}"/>
+                <DataGridTextColumn Header="操作类型" Width="90"
+                                    Binding="{Binding OpType, Converter={StaticResource OpTypeDisplayConverter}}"/>
+                <DataGridTextColumn Header="原路径" Width="*" MinWidth="110" Binding="{Binding Path}"/>
+                <DataGridTextColumn Header="备注" Width="220" Binding="{Binding Detail}"/>
+            </DataGrid.Columns>
+        </DataGrid>
+    </DockPanel>
+</Window>

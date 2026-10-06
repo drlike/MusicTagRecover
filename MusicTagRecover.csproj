@@ -1,0 +1,103 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows7.0</TargetFramework>
+    <LangVersion>12.0</LangVersion>
+    <Nullable>enable</Nullable>
+    <!-- WPF 标记编译的临时项目(_wpftmp)不继承 SDK 隐式 using，改为源码级 GlobalUsings.cs 统一声明 -->
+    <ImplicitUsings>disable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>icon.ico</ApplicationIcon>
+    <!-- 应用版本号（同时生成程序集版本与文件版本） -->
+    <Version>0.9.0</Version>
+    <!-- FFmpeg 播放内核仅随 x64 原生二进制分发，固定进程架构，避免 ARM64 下加载失败 -->
+    <PlatformTarget>x64</PlatformTarget>
+    <!-- 播放内核使用 FFmpeg 9（FFmpeg.AutoGen 直接 P/Invoke，需要不安全代码指针） -->
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <!-- MediaInfo.Core.Native 携带一批 Linux 版本化 RID（ubuntu.22.04-x64 等），
+         .NET 8+ 对这类资产发出 NETSDK1206；本应用仅分发 win-x64（MediaInfo.dll 经 win-x64
+         资产正常解析并排除在 libs 搬运之外），该警告与实际运行无关，显式忽略 -->
+    <NoWarn>$(NoWarn);NETSDK1206</NoWarn>
+    <Platforms>AnyCPU;x64</Platforms>
+  </PropertyGroup>
+
+  <!-- 裁剪与 Windows x64 无关的原生资产：MediaInfo.Core.Native 附带约 40 个
+       Linux/macOS 运行时变体（合计约 540MB libmediainfo.so/dylib），本应用
+       PlatformTarget=x64，这些文件永远不会被加载；根目录 x86\ 变体同理。 -->
+  <Target Name="TrimRedundantNativeRuntimes" AfterTargets="Build" Condition="Exists('$(OutDir)runtimes')">
+    <PropertyGroup>
+      <_RuntimesFull>$([System.IO.Path]::GetFullPath('$(OutDir)runtimes'))</_RuntimesFull>
+    </PropertyGroup>
+    <ItemGroup>
+      <_RidDir Include="$([System.IO.Directory]::GetDirectories('$(_RuntimesFull)'))" />
+      <_RidDir Remove="$(_RuntimesFull)\win-x64" />
+    </ItemGroup>
+    <RemoveDir Directories="@(_RidDir)" />
+    <RemoveDir Directories="$(OutDir)x86" />
+  </Target>
+
+  <!-- 通用依赖 -->
+  <ItemGroup>
+    <!-- tools\ 下为独立工具项目（基准测试等），不属于应用本体，避免默认通配符
+         把工具的 Program.cs/obj 生成物编进主程序（会导致入口点冲突与特性重复） -->
+    <Compile Remove="tools\**\*.cs" />
+    <!-- tests\ 下为 xUnit 单元测试项目，独立构建，不编入应用本体 -->
+    <Compile Remove="tests\**\*.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FFmpeg.AutoGen" Version="9.0.1.1" />
+    <PackageReference Include="NAudio" Version="3.1.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+    <PackageReference Include="TagLibSharp" Version="2.3.0" />
+    <PackageReference Include="System.Data.SQLite.Core" Version="1.0.119" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.12" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.12" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+    <PackageReference Include="FontAwesome.Sharp" Version="6.6.0" />
+  </ItemGroup>
+
+  <!-- net10: 使用 MediaInfo 读取标签（更稳健的格式支持） -->
+  <ItemGroup>
+    <PackageReference Include="MediaInfo.Wrapper.Core" Version="26.1.0" />
+    <!-- MediaInfo.Native 需显式直接引用：它的原生 DLL 靠 build\MediaInfo.Native.targets
+         拷到输出 x64\x86 子目录，但该 targets 只在直接引用时才被 NuGet 导入（传递包不导入 build\ 资产） -->
+    <PackageReference Include="MediaInfo.Native" Version="26.1.0" />
+    <PackageReference Include="TagLibSharp2" Version="0.6.0" />
+  </ItemGroup>
+
+  <!-- ============================================================
+       播放内核原生库：
+       - ThirdParty\ffmpeg\  FFmpeg 9.0.2 shared（gyan.dev full_build-shared）
+         拷贝到输出 ffmpeg\ 子目录，App 启动时设置 FFmpeg.AutoGen 的 ffmpeg.RootPath
+       - ThirdParty\mac\     Monkey's Audio 官方 SDK 的 MACDll64.dll（APE 专用解码）
+         拷贝到输出 mac\ 子目录，ApeDecoder 通过 P/Invoke 调用
+       均位于子目录中，不受下方 MoveDepsToLibs（仅搬顶层 *.dll）影响。
+       ============================================================ -->
+  <ItemGroup>
+    <None Include="ThirdParty\ffmpeg\*.dll" CopyToOutputDirectory="PreserveNewest" Link="ffmpeg\%(Filename)%(Extension)" />
+    <None Include="ThirdParty\ffmpeg\*.txt" CopyToOutputDirectory="PreserveNewest" Link="ffmpeg\%(Filename)%(Extension)" />
+    <None Include="ThirdParty\mac\*.dll" CopyToOutputDirectory="PreserveNewest" Link="mac\%(Filename)%(Extension)" />
+    <None Include="ThirdParty\mac\*.txt" CopyToOutputDirectory="PreserveNewest" Link="mac\%(Filename)%(Extension)" />
+  </ItemGroup>
+
+  <!-- ============================================================
+       生成后：将依赖 DLL 移到输出目录下的 libs\ 子目录，
+       与 exe 分开，保持根目录整洁。AssemblyResolver 在启动前注册解析。
+       排除原生 DLL（MediaInfo.dll / SQLite.Interop.dll 等），否则 DllImport 找不到。
+       ============================================================ -->
+  <Target Name="MoveDepsToLibs" AfterTargets="Build">
+    <ItemGroup>
+      <_DepDll Include="$(TargetDir)*.dll" Exclude="$(TargetDir)$(AssemblyName).dll" />
+      <!-- 排除原生 DLL（MediaInfo.dll 等），否则 DllImport 找不到 -->
+      <_DepDll Remove="$(TargetDir)MediaInfo.dll" />
+      <_DepDll Remove="$(TargetDir)MediaInfo_*.*" />
+      <_DepDll Remove="$(TargetDir)SQLite.Interop.dll" />
+    </ItemGroup>
+    <MakeDir Directories="$(TargetDir)libs" Condition="!Exists('$(TargetDir)libs')" />
+    <Move SourceFiles="@(_DepDll)" DestinationFolder="$(TargetDir)libs" />
+  </Target>
+
+</Project>

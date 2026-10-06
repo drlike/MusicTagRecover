@@ -1,0 +1,173 @@
+<Window x:Class="MusicTagRecover.Views.Dialogs.TagHistoryWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:inf="clr-namespace:MusicTagRecover.Infrastructure"
+        Title="标签历史"
+        Width="800" Height="580"
+        MinWidth="660" MinHeight="440"
+        WindowStartupLocation="CenterOwner"
+        ShowInTaskbar="False"
+        Background="{StaticResource PageBgBrush}">
+
+    <Window.Resources>
+        <inf:BoolToVisibilityConverter x:Key="BusyVis"/>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" Margin="12,12,12,8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="210"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- 左侧历史记录列表 -->
+            <ListBox Grid.Column="0" Margin="0,0,6,0"
+                     ItemsSource="{Binding Records}"
+                     SelectedItem="{Binding SelectedItem}"
+                     MouseDoubleClick="ListBox_MouseDoubleClick"
+                     BorderThickness="1">
+                <ListBox.ItemContainerStyle>
+                    <Style TargetType="ListBoxItem">
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                    </Style>
+                </ListBox.ItemContainerStyle>
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Display}" Margin="4,3" TextTrimming="CharacterEllipsis"/>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+
+            <!-- 右侧详情 -->
+            <Border Grid.Column="1" Margin="6,0,0,0" Background="{StaticResource CardBgBrush}"
+                    BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="3">
+                <Grid>
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <StackPanel Margin="12">
+
+                            <!-- 封面区 -->
+                            <Border Width="200" Height="200" HorizontalAlignment="Left"
+                                    Background="{StaticResource RowHoverBrush}" CornerRadius="3">
+                                <Grid>
+                                    <TextBlock Text="无封面" Foreground="{StaticResource TextSecondaryBrush}"
+                                               HorizontalAlignment="Center" VerticalAlignment="Center">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding HasCover}" Value="False">
+                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                    <Image Source="{Binding CoverImage}" Stretch="Uniform"
+                                           RenderOptions.BitmapScalingMode="HighQuality"/>
+                                </Grid>
+                            </Border>
+
+                            <!-- 文本字段网格 -->
+                            <Grid Margin="0,12,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="96"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="96"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+
+                                <Label Grid.Row="0" Grid.Column="0" Content="标题"/>
+                                <TextBox Grid.Row="0" Grid.Column="1" IsReadOnly="True"
+                                         Text="{Binding SelectedRecord.Title, Mode=OneWay}"/>
+                                <Label Grid.Row="0" Grid.Column="2" Content="艺术家"/>
+                                <TextBox Grid.Row="0" Grid.Column="3" IsReadOnly="True"
+                                         Text="{Binding SelectedRecord.Artist, Mode=OneWay}"/>
+
+                                <Label Grid.Row="1" Grid.Column="0" Content="专辑"/>
+                                <TextBox Grid.Row="1" Grid.Column="1" IsReadOnly="True"
+                                         Text="{Binding SelectedRecord.Album, Mode=OneWay}"/>
+                                <Label Grid.Row="1" Grid.Column="2" Content="年份"/>
+                                <TextBox Grid.Row="1" Grid.Column="3" IsReadOnly="True"
+                                         Text="{Binding SelectedRecord.Year, Mode=OneWay}"/>
+
+                                <Label Grid.Row="2" Grid.Column="0" Content="音轨"/>
+                                <TextBox Grid.Row="2" Grid.Column="1" IsReadOnly="True"
+                                         Text="{Binding SelectedRecord.TrackStr, Mode=OneWay}"/>
+                                <Label Grid.Row="2" Grid.Column="2" Content="碟片"/>
+                                <TextBox Grid.Row="2" Grid.Column="3" IsReadOnly="True"
+                                         Text="{Binding SelectedRecord.DiscStr, Mode=OneWay}"/>
+
+                                <Label Grid.Row="3" Grid.Column="0" Content="风格"/>
+                                <TextBox Grid.Row="3" Grid.Column="1" IsReadOnly="True"
+                                         Text="{Binding SelectedRecord.Genre, Mode=OneWay}"/>
+                                <Label Grid.Row="3" Grid.Column="2" Content="专辑艺术家"/>
+                                <TextBox Grid.Row="3" Grid.Column="3" IsReadOnly="True"
+                                         Text="{Binding SelectedRecord.AlbumArtist, Mode=OneWay}"/>
+
+                                <Label Grid.Row="4" Grid.Column="0" Content="作曲"/>
+                                <TextBox Grid.Row="4" Grid.Column="1" IsReadOnly="True"
+                                         Text="{Binding SelectedRecord.Composer, Mode=OneWay}"/>
+                                <Label Grid.Row="4" Grid.Column="2" Content="作词"/>
+                                <TextBox Grid.Row="4" Grid.Column="3" IsReadOnly="True"
+                                         Text="{Binding SelectedRecord.Lyricist, Mode=OneWay}"/>
+
+                                <Label Grid.Row="5" Grid.Column="0" Content="注释"/>
+                                <TextBox Grid.Row="5" Grid.Column="1" Grid.ColumnSpan="3"
+                                         IsReadOnly="True"
+                                         Text="{Binding SelectedRecord.Comment, Mode=OneWay}"/>
+                            </Grid>
+
+                            <Label Content="歌词" Margin="0,10,0,2"/>
+                            <TextBox Style="{StaticResource MultilineTextBox}"
+                                     IsReadOnly="True" Height="180"
+                                     Text="{Binding SelectedRecord.Lyrics, Mode=OneWay}"
+                                     TextWrapping="NoWrap"
+                                     VerticalScrollBarVisibility="Auto"
+                                     HorizontalScrollBarVisibility="Auto"
+                                     FontFamily="Consolas, Microsoft YaHei UI"/>
+                        </StackPanel>
+                    </ScrollViewer>
+
+                    <!-- 加载提示 -->
+                    <Border Background="#A0FFFFFF"
+                            Visibility="{Binding IsDetailLoading, Converter={StaticResource BusyVis}}">
+                        <ProgressBar IsIndeterminate="True" Width="160" Height="6"
+                                     HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <!-- 底部按钮 -->
+        <Border Grid.Row="1" Background="{StaticResource BottomBgBrush}"
+                BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,1,0,0"
+                Padding="12,8">
+            <Grid>
+                <Button Content="清空全部历史" Style="{StaticResource DangerButton}"
+                        HorizontalAlignment="Left"
+                        Command="{Binding ClearAllCommand}"/>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Content="恢复此记录" Style="{StaticResource PrimaryButton}"
+                            Command="{Binding RestoreCommand}" IsDefault="True"/>
+                    <Button Content="删除此记录" Margin="8,0,0,0" Style="{StaticResource BaseButton}"
+                            Command="{Binding DeleteCommand}"/>
+                    <Button Content="取消" Margin="8,0,0,0" Style="{StaticResource BaseButton}"
+                            Command="{Binding CancelCommand}" IsCancel="True"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

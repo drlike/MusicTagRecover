@@ -1,0 +1,19 @@
+﻿using System;
+
+namespace MusicTagRecover.Win32.FileDialog;
+
+/// <summary>
+/// SIGDN (Shell Item Get Display Name) flags for IShellItem.GetDisplayName.
+/// </summary>
+internal enum SIGDN : uint
+{
+    SIGDN_NORMALDISPLAY            = 0x00000000,
+    SIGDN_PARENTRELATIVEPARSING    = 0x80018001,
+    SIGDN_DESKTOPABSOLUTEPARSING   = 0x80028000,
+    SIGDN_PARENTRELATIVEEDITING    = 0x80031001,
+    SIGDN_DESKTOPABSOLUTEEDITING   = 0x8004C000,
+    SIGDN_FILESYSPATH              = 0x80058000,
+    SIGDN_PARENTRELATIVEFORADDRESSBAR = 0x8007C001,
+    SIGDN_PARENTRELATIVE           = 0x80080001,
+    SIGDN_PARENTRELATIVEFORUI      = 0x00094001,
+}

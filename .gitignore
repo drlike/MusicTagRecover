@@ -1,0 +1,19 @@
+## Visual Studio / .NET 通用忽略项
+bin/
+obj/
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+## 构建临时
+*_wpftmp.*
+
+## 发布产物
+publish/
+*.zip
+
+## 系统文件
+Thumbs.db
+Desktop.ini

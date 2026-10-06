@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>ScanBench</AssemblyName>
+    <RootNamespace>ScanBench</RootNamespace>
+    <!-- 基准测试工具：不进入解决方案构建，仅独立 dotnet run -->
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\MusicTagRecover.csproj" />
+  </ItemGroup>
+
+</Project>
